@@ -1,0 +1,51 @@
+<div id="<%= table.name %>_table_div">
+  <button id="<%= table.name %>_add_btn">+</button>
+  <table>
+    <tr>
+      <% for(var hi=0;hi<table.list_def.__list_fields.length;hi++) { %>
+        <% var field_name = table.list_def.__list_fields[hi] %>
+      <th><%= field_name %></th>
+      <% } %>
+    </tr>
+
+    <% for(var ri=0;ri<table.data.length;ri++) { %>
+    <% var item = table.data[ri] %>
+    <tr>
+      <% for(var hi=0;hi<table.list_def.__list_fields.length;hi++) { %>
+        <% var field_name = table.list_def.__list_fields[hi] %>
+      <td><%= item[field_name] %></td>
+      <% } %>
+    <tr>
+    <% } %>
+
+  </table>
+</div>
+<div id="<%= table.name %>_form_div" style="display:none">
+</div>
+<script>
+  var show_form = function() {
+    $("#<%= table.name %>_table_div").hide();
+    $("#<%= table.name %>_form_div").show();
+  }
+  var show_table = function() {
+    $("#<%= table.name %>_form_div").hide();
+    $("#<%= table.name %>_table_div").show();
+  }
+  
+  connect({ 
+    source      : '#<%= table.name %>_add_btn',
+    url         : '/noxious/form/<%= table.form %>', 
+    target      : '#<%= table.name %>_form_div',
+    after_load  : function() { 
+      show_form(); 
+      connect({
+        form        : '#<%= table.name %>_form_div form',
+        source      : '#<%= table.name %>_form_div input',
+        url         : '/noxious/form', 
+        after_load  : function() {
+          show_table();
+        }
+      });
+    }
+  });
+</script>

@@ -1,0 +1,132 @@
+var TextField = module.exports.TextField = function(length,default_value) {
+  this.type = 'text';
+  this.length = length
+  this.default_value = default_value==undefined?'':default_value;
+}
+
+var ArrayField = module.exports.ArrayField = function(item_template_name,default_value) {
+  this.type = 'array';
+  this.item_template_name = item_template_name;
+  this.default_value = default_value==undefined?[]:default_value;
+}
+
+var RefField = module.exports.RefField = function(item_template_name,default_value) {
+  this.type = 'ref';
+  this.item_template_name = item_template_name;
+  this.default_value = default_value==undefined?{}:default_value;
+}
+
+
+var account = {
+  number : new TextField(10),
+}
+var user = {
+  name : new TextField(30),
+  gender : new RefField('gender'),
+  surname : new TextField(50),
+  accounts : new ArrayField('account'),
+}
+var gender = {
+  name : new TextField(30),
+}
+
+
+var default_user_admin = {
+  __list_fields : ['name','surname',function(item) { }],       // This the fields that will be on a list
+  __field_order : ['name','surname','gender','accounts']
+}
+
+
+
+
+var Maker = module.exports.Maker = function() {
+  this.templates = {};
+}
+
+Maker.prototype.register_template = function(template_name,template,mapper) {
+  this.templates[template_name] = { template:template, mapper:mapper } ;
+}
+
+Maker.prototype.create_instance = function(template_name,source) {
+  var ret_val = {};
+  var template = this.templates[template_name];
+  var template_keys = Object.keys(template.template);
+  for(var ki=0;ki<template_keys.length;ki++) {
+    var key = template_keys[ki];
+    var template_field = template.template[key];
+    
+    ret_val.__type = template.template; 
+
+    // Get the value, default,source, mapper
+    //
+    var val;
+    if(source != undefined) {
+      if(source[key] != undefined)
+        val = source[key];
+      if(template.mapper != undefined) {
+        var map = template.mapper[key];
+        if(map != undefined)
+          if(map instanceof Function)
+            val = map(source);
+          else
+            val = source[map];
+      }
+    }
+    if(val==undefined)
+      val = template.template[key].default_value;
+        
+    if(template_field.type == 'text') {
+      ret_val[key] = val;
+    }
+    if(template_field.type == 'array') {
+      ret_val[key] = [];
+      for(var i=0;i<val.length;i++) {
+        ret_val[key].push(this.create_instance(template_field.item_template_name,val[i]));
+      }
+    }
+    if(template_field.type == 'ref') {
+      ret_val[key] = this.create_instance(template_field.item_template_name,val);
+    }
+  }
+  return ret_val;
+} 
+
+Maker.prototype.convert = function(source) {
+  var that = this;
+  return new function() {
+    this.to = function(template_name) {
+      if(source instanceof Array) {
+        var ret_val = [];
+        for(var i=0;i<source.length;i++)
+          ret_val.push(that.create_instance(template_name,source[i]));
+        return ret_val;
+      } else      
+        return that.create_instance(template_name,source);
+    }
+  }
+}
+
+Maker.prototype.get_new = function(template_name) {
+  return this.create_instance(template_name);
+} 
+
+/*
+
+var jj = { name:'johan', lastname:'jordaan', gender:'male',  accs:[{no:'123'}] }
+var le = { name:'lorraine', lastname:'evert', gender:'female' }
+var u_mapper = { surname : 'lastname', accounts:'accs', gender:function(item) { return {name : gender}; } }
+var a_mapper = { number : 'no' }
+
+var m = new Maker();
+m.register_template('user',user,u_mapper);
+m.register_template('account',account,a_mapper);
+m.register_template('gender',gender);
+//var u = m.create_instance('user',jj);
+var u = m.convert(jj).to('user');
+//console.log(u);
+
+var u = m.convert([jj,le]).to('user');
+//console.log(u);
+
+console.log(m.get_new('user'));
+*/
