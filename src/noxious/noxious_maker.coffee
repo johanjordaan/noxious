@@ -7,19 +7,16 @@ class Maker
     @settings = settings
     @templates = {}
     @create_db settings.name  
-    
 
   create_db: (name)=>
-    console.log 'Creating ....'
     @connection = new (cradle.Connection)
     @db = @connection.database name
-    @db.exists (exists) =>
+    @db.exists (err,exists) =>
       if not exists
         @db.create => 
         
   destroy_db: =>
-    console.log 'Destroying ....'
-    @db.exists (exists) =>
+    @db.exists (err,exists) =>
       if exists
         @db.destroy => 
         

@@ -18,7 +18,7 @@
     function User() {
       this.name = new nt.TextField(20);
       this.surname = new nt.TextField(30);
-      this.accounts = new nt.ArrayField('Account');
+      this.accounts = new nt.ArrayField('account');
     }
 
     return User;
@@ -43,7 +43,8 @@
     var m;
     m = new nm.Maker(settings);
     after(function(done) {
-      m.destroy_db;
+      console.log('After ...');
+      m.destroy_db();
       return done();
     });
     describe('.constructor()', function() {
@@ -54,15 +55,11 @@
     });
     describe('.register_template(template_name,template,mapper)', function() {
       var keys;
-      m = new nm.Maker(settings);
       m.register_template('user', User);
+      m.register_template('account', Account);
       keys = Object.keys(m.templates);
-      after(function(done) {
-        m.destroy_db;
-        return done();
-      });
       it('should register only the template specified', function(done) {
-        keys.length.should.equal(1);
+        keys.length.should.equal(2);
         return done();
       });
       it('should add the template with the specidfied key', function(done) {
@@ -82,7 +79,7 @@
           return i;
         });
         keys = Object.keys(m.templates);
-        keys.length.should.equal(2);
+        keys.length.should.equal(3);
         return done();
       });
       return it('should add a mapper if specified', function(done) {
@@ -91,16 +88,9 @@
       });
     });
     describe('.create_instance(template_name,source)', function() {
-      m = new nm.Maker(settings);
-      m.register_template('User', User);
-      m.register_template('Account', Account);
-      after(function(done) {
-        m.destroy_db;
-        return done();
-      });
       it('should create a default instance of the type specified if no source is specified', function(done) {
         var o;
-        o = m.create_instance('User');
+        o = m.create_instance('user');
         o.name.should.equal('');
         o.surname.should.equal('');
         expect(o.accounts).to.be.a('Array');
@@ -109,7 +99,7 @@
       });
       return it('should create an instance of the type specified and populate it with the data from the source', function(done) {
         var account, o, x, _i, _len, _ref;
-        o = m.create_instance('User', {
+        o = m.create_instance('user', {
           name: 'johan',
           surname: 'jordaan',
           accounts: [
@@ -120,7 +110,6 @@
             }
           ]
         });
-        console.log;
         o.name.should.equal('johan');
         o.surname.should.equal('jordaan');
         o.accounts.length.should.equal(2);
@@ -143,11 +132,6 @@
       });
     });
     return describe('.save()', function() {
-      m = new nm.Maker(settings);
-      after(function(done) {
-        m.destroy_db;
-        return done();
-      });
       return it('should save', function(done) {
         m.register_template('User', User);
         m.register_template('Account', Account);

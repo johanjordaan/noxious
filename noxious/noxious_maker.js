@@ -26,10 +26,9 @@
 
     Maker.prototype.create_db = function(name) {
       var _this = this;
-      console.log('Creating ....');
       this.connection = new cradle.Connection;
       this.db = this.connection.database(name);
-      return this.db.exists(function(exists) {
+      return this.db.exists(function(err, exists) {
         if (!exists) {
           return _this.db.create(function() {});
         }
@@ -38,8 +37,7 @@
 
     Maker.prototype.destroy_db = function() {
       var _this = this;
-      console.log('Destroying ....');
-      return this.db.exists(function(exists) {
+      return this.db.exists(function(err, exists) {
         if (exists) {
           return _this.db.destroy(function() {});
         }

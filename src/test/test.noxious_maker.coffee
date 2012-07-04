@@ -11,7 +11,7 @@ class User
   constructor: ->
     @name = new nt.TextField 20
     @surname = new nt.TextField 30
-    @accounts = new nt.ArrayField 'Account'
+    @accounts = new nt.ArrayField 'account'
 
 class Account
   constructor: ->
@@ -25,7 +25,7 @@ settings =
 describe 'Maker',()=>
   m = new nm.Maker settings
   after (done) =>
-    m.destroy_db 
+    m.destroy_db() 
     done()
 
   describe '.constructor()',()=>
@@ -34,16 +34,12 @@ describe 'Maker',()=>
       done()
       
   describe '.register_template(template_name,template,mapper)',()=>
-    m = new nm.Maker settings
     m.register_template('user',User)
+    m.register_template('account',Account)
     keys = Object.keys(m.templates)
-
-    after (done) =>
-      m.destroy_db
-      done()
     
     it 'should register only the template specified',(done) =>
-      keys.length.should.equal 1
+      keys.length.should.equal 2
       done()
       
     it 'should add the template with the specidfied key',(done) =>
@@ -62,7 +58,7 @@ describe 'Maker',()=>
       m.register_template 'user2',User,(i) =>
         i  
       keys = Object.keys(m.templates)
-      keys.length.should.equal 2
+      keys.length.should.equal 3
       done()
     
     it 'should add a mapper if specified',(done) =>
@@ -70,16 +66,8 @@ describe 'Maker',()=>
       done()
 
   describe '.create_instance(template_name,source)',()=>
-    m = new nm.Maker settings
-    m.register_template 'User',User
-    m.register_template 'Account',Account
-
-    after (done) =>
-      m.destroy_db 
-      done()
-    
     it 'should create a default instance of the type specified if no source is specified',(done) =>
-      o = m.create_instance 'User'
+      o = m.create_instance 'user'
       o.name.should.equal ''
       o.surname.should.equal ''
       expect(o.accounts).to.be.a 'Array'
@@ -87,14 +75,13 @@ describe 'Maker',()=>
       done()
 
     it 'should create an instance of the type specified and populate it with the data from the source',(done) =>
-      o = m.create_instance 'User',
+      o = m.create_instance 'user',
               name: 'johan'
               surname: 'jordaan'
               accounts: [
                 { number: '123' }
                 { number: '321' }
               ]
-      console.log 
       o.name.should.equal 'johan'
       o.surname.should.equal 'jordaan'
       o.accounts.length.should.equal 2
@@ -102,14 +89,7 @@ describe 'Maker',()=>
       ((account.__type instanceof Account).should.equal true) for account in o.accounts 
       done()
       
-      
-      
   describe '.save()',()=>
-    m = new nm.Maker settings
-    after (done) =>
-      m.destroy_db 
-      done()
-  
     it 'should save',(done) =>
       m.register_template 'User',User
       m.register_template 'Account',Account
