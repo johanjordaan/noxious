@@ -10,6 +10,8 @@
   Maker = (function() {
 
     function Maker(settings) {
+      this.save = __bind(this.save, this);
+
       this.create_instance = __bind(this.create_instance, this);
 
       this.handle = __bind(this.handle, this);
@@ -87,7 +89,8 @@
     };
 
     Maker.prototype.create_instance = function(template_name, source) {
-      var key, ret_val, template, template_keys, _i, _len;
+      var key, ret_val, template, template_keys, _i, _len,
+        _this = this;
       ret_val = {};
       template = this.templates[template_name];
       template_keys = Object.keys(template.template);
@@ -95,8 +98,13 @@
         key = template_keys[_i];
         this.handle(ret_val, template, key, source);
       }
+      ret_val.save = function() {
+        return _this.save( this);
+      };
       return ret_val;
     };
+
+    Maker.prototype.save = function(o) {};
 
     return Maker;
 

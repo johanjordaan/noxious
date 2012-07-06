@@ -1,67 +1,41 @@
-maker = require './maker.js'
+fs = require 'fs'
+path =  require 'path'
 
-# This is config stuff that needs to move out of here
-#
-tables = 
-  users : 
-    name      : 'users'
-    type      : 'user'
-    list_def  : 
-      __list_fields : [ 'name','surname' ] 
-    data      : []
-    form      : 'user'
+templates = []
 
-forms =
-  user : 
-    type      : 'user'
-
-user = 
-  name : new maker.TextField 30
-  surname : new maker.TextField 50
-
-
-m = new maker.Maker
-m.register_template 'user',user
-tables.users.data = m.convert([{name:'johan',surname:'jordaan'},{name:'lorraine',surname:'evert'}]).to 'user'
-
-# The core stuff below ...
-#
-
-post_form = (req,res) =>
-  console.log 'Posting stuff'
-  res.render 'noxious/index', 
-    title: 'noxious'
-
-get_form = (req,res) =>
-  form_name = req.params.form
-  form = forms[form_name]
+construct_class = (name,template) =>
+  # Create the class in the module namespace
+  module.exports[name] = ()->
+    @save = ()=>
+      console.log 'Saving ...'
+    undefined    
   
-  if(req.xhr)
-    res.partial 'noxious/form',
-      form:form 
-  else 
-    res.render 'noxious/form', 
-      form:form   
+  # Create the load method in the module namespace for this
+  module.exports[name+'s'] = 
+    load : () ->
+      console.log 'Loading ...'
+  
+module.exports.construct_class = construct_class
+  
+add_template = (template) =>
+  templates[template.__name] = template
 
-landing_page = (req, res) =>
-  res.render 'noxious/index', 
-    title: 'noxious'
+load_template_file = (file) =>
+  tmp = require './'+file
+  add_template(template) for template in Object.keys(tmp)
 
+load_template_dir = (dir) =>
+  # List the files in the directory
+  files = fs.readdirSync dir
+  
+  # then for each one of the files load the templates
+  load_template_file(file) for file in files
+  
 
-table = (req,res) =>
-  table_name = req.params.table;
-  table = tables[table_name];
- 
-  if(req.xhr)
-    res.partial 'noxious/table'
-      table:table
-  else 
-    res.render 'noxious/table',
-      table:table
-
-module.exports = (app) =>
-  app.get '/noxious', landing_page
-  app.get '/noxious/table/:table', table
-  app.get '/noxious/form/:form',get_form
-  app.post '/noxious/form',post_form
-
+module.exports.init = (settings) =>
+  # Load all the template directories
+  load_template_dir(dir) for dir in settings.template_dirs
+    
+  # Create a new  
+  construct_class(key,templates[key]) for key in Object.keys(templates)
+  

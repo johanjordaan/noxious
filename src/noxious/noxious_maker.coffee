@@ -53,6 +53,13 @@ class Maker
       
     @handle ret_val,template,key,source for key in template_keys  
 
+    ret_val.save = =>
+      @save(` this`)
+    
     ret_val
+    
+  save: (o)=>
+    
+    
  
 module.exports.Maker = Maker  

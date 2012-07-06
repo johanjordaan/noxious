@@ -91,7 +91,13 @@ describe 'Maker',()=>
       
   describe '.save()',()=>
     it 'should save',(done) =>
-      m.register_template 'User',User
-      m.register_template 'Account',Account
+      o = m.create_instance 'user',
+              name: 'johan'
+              surname: 'jordaan'
+              accounts: [
+                { number: '123' }
+                { number: '321' }
+              ]
+      o.save()
       done()
       

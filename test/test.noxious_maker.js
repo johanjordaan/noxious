@@ -43,7 +43,6 @@
     var m;
     m = new nm.Maker(settings);
     after(function(done) {
-      console.log('After ...');
       m.destroy_db();
       return done();
     });
@@ -133,8 +132,19 @@
     });
     return describe('.save()', function() {
       return it('should save', function(done) {
-        m.register_template('User', User);
-        m.register_template('Account', Account);
+        var o;
+        o = m.create_instance('user', {
+          name: 'johan',
+          surname: 'jordaan',
+          accounts: [
+            {
+              number: '123'
+            }, {
+              number: '321'
+            }
+          ]
+        });
+        o.save();
         return done();
       });
     });
