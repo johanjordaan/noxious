@@ -1,41 +1,48 @@
 fs = require 'fs'
 path =  require 'path'
 
-templates = []
+constructed_artifacts = []
 
-construct_class = (name,template) =>
+clear = () =>
+  delete module.exports[cls] for cls in constructed_artifacts
+  constructed_artifacts = []
+
+construct_class = (default_name,template) =>
+  # Create an instance of the class sothat we can utilise its innards like __xxx
+  #
+  instance = new template
+  name = instance.__name ? default_name
+  plural = instance.__plural ? name+'s' 
+  
   # Create the class in the module namespace
+  #
+  constructed_artifacts.push(name)
   module.exports[name] = ()->
     @save = ()=>
       console.log 'Saving ...'
     undefined    
   
-  # Create the load method in the module namespace for this
-  module.exports[name+'s'] = 
+  # Create the load method in the module namespace for this class
+  #
+  constructed_artifacts.push(plural)
+  module.exports[plural] = 
     load : () ->
       console.log 'Loading ...'
+
+construct_classes_from_file = (file) =>
+  tmp = require file
+  construct_class(key,tmp[key]) for key in Object.keys(tmp)
+
+construct_classes_from_dir = (dir) =>
+  construct_classes_from_file(path.join(dir,file)) for file in fs.readdirSync dir
   
+init = (settings) =>
+  construct_classes_from_dir(path.join(settings.root_dir,dir)) for dir in settings.template_dirs
+  
+module.exports.clear = clear
 module.exports.construct_class = construct_class
+module.exports.init = init  
   
-add_template = (template) =>
-  templates[template.__name] = template
-
-load_template_file = (file) =>
-  tmp = require './'+file
-  add_template(template) for template in Object.keys(tmp)
-
-load_template_dir = (dir) =>
-  # List the files in the directory
-  files = fs.readdirSync dir
   
-  # then for each one of the files load the templates
-  load_template_file(file) for file in files
   
-
-module.exports.init = (settings) =>
-  # Load all the template directories
-  load_template_dir(dir) for dir in settings.template_dirs
-    
-  # Create a new  
-  construct_class(key,templates[key]) for key in Object.keys(templates)
   
