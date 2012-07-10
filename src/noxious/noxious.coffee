@@ -7,17 +7,25 @@ clear = () =>
   delete module.exports[cls] for cls in constructed_artifacts
   constructed_artifacts = []
 
+construct_class_field = (cls,key,field) =>
+  if field.type == 'text'
+    cls[key] = field.default_value ? ''
+
+  if field.type == 'ref'
+    cls[key] = new module.exports[field.item_template_name]
+    
 construct_class = (default_name,template) =>
-  # Create an instance of the class sothat we can utilise its innards like __xxx
+  # Create an instance of the template sothat we can utilise its innards like __xxx
   #
-  instance = new template
-  name = instance.__name ? default_name
-  plural = instance.__plural ? name+'s' 
+  template_instance = new template
+  name = template_instance.__name ? default_name
+  plural = template_instance.__plural ? name+'s' 
   
   # Create the class in the module namespace
   #
   constructed_artifacts.push(name)
   module.exports[name] = ()->
+    construct_class_field(@,key,template_instance[key]) for key in Object.keys(template_instance)
     @save = ()=>
       console.log 'Saving ...'
     undefined    

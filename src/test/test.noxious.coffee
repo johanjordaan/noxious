@@ -9,8 +9,15 @@ nox = require '../noxious/noxious.js'
 
 class User
   constructor: ->
-    @name = new types.TextField 10
+    @__name = 'User'
+    @name = new types.TextField 10,'johan'
     @surname = new types.TextField 20
+    @gender = new types.RefField 'Gender'
+
+class Gender
+  constructor: ->
+    @__name = 'Gender'
+    @label = new types.TextField 20
 
 class Client
   constructor: ->
@@ -23,9 +30,9 @@ class Client
 # construct_class
 #
 describe 'construct_class',()=>
+  nox.construct_class('Gender',Gender)
   nox.construct_class('User',User)
   nox.construct_class('Client',Client)
-
   
   it 'should create the new class in the namespace',(done) =>
     should.exist(nox.User)
@@ -40,11 +47,6 @@ describe 'construct_class',()=>
     expect(nox.User).to.be.a('Function')
     done()  
 
-  it 'should create a class with a save function',(done) =>
-    user = new nox.User()
-    expect(user.save).to.be.a('Function')
-    done()
-
   it 'should create a function to load the objects of this type',(done) =>
     expect(nox.Users.load).to.be.a('Function')
     done()
@@ -52,7 +54,12 @@ describe 'construct_class',()=>
   it 'should create a function to load the objects of this type using the plural attribute',(done) =>
     expect(nox.XClientsss.load).to.be.a('Function')
     done()
-   
+
+  it 'should create a class with a save function',(done) =>
+    user = new nox.User()
+    console.log '+++',user
+    expect(user.save).to.be.a('Function')
+    done()
     
 # clear
 #

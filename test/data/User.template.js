@@ -7,7 +7,8 @@
   User = (function() {
 
     function User() {
-      this.name = new types.TextField(10);
+      this.name = 'User';
+      this.name = new types.TextField(10, 'johan');
       this.surname = new types.TextField(20);
     }
 
