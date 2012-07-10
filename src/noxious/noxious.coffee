@@ -1,5 +1,7 @@
 fs = require 'fs'
 path =  require 'path'
+cradle = require 'cradle'
+async = require 'async'
 
 constructed_artifacts = []
 
@@ -27,7 +29,13 @@ construct_class = (default_name,template) =>
   module.exports[name] = ()->
     construct_class_field(@,key,template_instance[key]) for key in Object.keys(template_instance)
     @save = ()=>
-      console.log 'Saving ...'
+      console.log ` this`,db
+      db.save ` this`, (err,res)=>
+        if err
+          console.log '---',err,res
+        else
+          console.log 'Saved',res
+      undefined 
     undefined    
   
   # Create the load method in the module namespace for this class
@@ -43,9 +51,29 @@ construct_classes_from_file = (file) =>
 
 construct_classes_from_dir = (dir) =>
   construct_classes_from_file(path.join(dir,file)) for file in fs.readdirSync dir
+
+db = undefined    
+init = (settings,callback) =>
+  # Create the db if it does not exist
+  #
+  c = new(cradle.Connection)()
+  db = c.database('test') 
   
-init = (settings) =>
-  construct_classes_from_dir(path.join(settings.root_dir,dir)) for dir in settings.template_dirs
+  async.series [
+    # First call the db create. This will create the db if it does not exist and fail silently 
+    # if the db already exists
+    #
+    (acallback) -> 
+      db.create () ->
+        acallback(null,null)
+    # Then construct the classes
+    #
+    (acallback) ->
+      construct_classes_from_dir(path.join(settings.root_dir,dir)) for dir in settings.template_dirs
+      acallback(null,null)
+  ],()->
+    callback()
+  
   
 module.exports.clear = clear
 module.exports.construct_class = construct_class

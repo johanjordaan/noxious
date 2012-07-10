@@ -1,8 +1,11 @@
 path = require 'path'
+async = require 'async'
 
 chai = require 'chai'  
 should = chai.should()  
 expect = chai.expect
+
+
 
 types = require '../noxious/noxious_types.js' 
 nox = require '../noxious/noxious.js' 
@@ -57,7 +60,6 @@ describe 'construct_class',()=>
 
   it 'should create a class with a save function',(done) =>
     user = new nox.User()
-    console.log '+++',user
     expect(user.save).to.be.a('Function')
     done()
     
@@ -83,10 +85,29 @@ describe 'init',()=>
   it 'should construct the classes specified in the files',(done) =>
     nox.clear()
     nox.init
+      db_name : 'test'
       root_dir : path.resolve()
       template_dirs : ['./test/data']
-    should.exist(nox.User)  
-    should.exist(nox.Users) 
-    should.exist(nox.XClient)  
-    should.exist(nox.XClientsss) 
-    done()
+      ()->
+        should.exist(nox.User)  
+        should.exist(nox.Users) 
+        should.exist(nox.XClient)  
+        should.exist(nox.XClientsss) 
+        done()
+
+    
+# save
+#
+describe 'save',()=>
+  it 'should save the class to the DB',(done) =>
+    nox.clear()
+    nox.init
+      db_name : 'test'
+      root_dir : path.resolve()
+      template_dirs : ['./test/data']
+      ()->
+        u = new nox.User
+        u.name = 'Johan'
+        u.save()  
+        done()
+    
