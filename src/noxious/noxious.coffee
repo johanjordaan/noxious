@@ -16,6 +16,10 @@ construct_class_field = (cls,key,field) =>
   if field.type == 'ref'
     cls[key] = new module.exports[field.item_template_name]
     
+construct_db_field = (dest,key,field,source) =>
+  if field.type == 'text'
+    dest[key] = source[key]
+    
 construct_class = (default_name,template) =>
   # Create an instance of the template sothat we can utilise its innards like __xxx
   #
@@ -27,14 +31,30 @@ construct_class = (default_name,template) =>
   #
   constructed_artifacts.push(name)
   module.exports[name] = ()->
+    @__name = name
+    @template_instance = template_instance
     construct_class_field(@,key,template_instance[key]) for key in Object.keys(template_instance)
-    @save = ()=>
-      console.log ` this`,db
-      db.save ` this`, (err,res)=>
-        if err
-          console.log '---',err,res
-        else
-          console.log 'Saved',res
+    @save = (callback)=>
+      console.log @
+      db_val = {} 
+      db_val.type_ = @__name
+      construct_db_field(db_val,key,template_instance[key],@) for key in Object.keys(template_instance)
+      if @__id
+        console.log 'Merge',@__id
+        db.merge @__id,db_val, (err,res)=>
+          if err
+            console.log '---',err,res
+          else
+            @__id = res.id
+          callback()
+      else
+        console.log 'Save'
+        db.save db_val, (err,res)=>
+          if err
+            console.log '---',err,res
+          else
+            @__id = res.id
+          callback()
       undefined 
     undefined    
   

@@ -126,11 +126,15 @@
         root_dir: path.resolve(),
         template_dirs: ['./test/data']
       }, function() {
-        var u;
+        var u,
+          _this = this;
         u = new nox.User;
         u.name = 'Johan';
-        u.save();
-        return done();
+        return u.save(function() {
+          return u.save(function() {
+            return done();
+          });
+        });
       });
     });
   });

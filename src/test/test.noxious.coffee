@@ -108,6 +108,7 @@ describe 'save',()=>
       ()->
         u = new nox.User
         u.name = 'Johan'
-        u.save()  
-        done()
+        u.save ()=>  
+          u.save ()=>
+            done()
     
