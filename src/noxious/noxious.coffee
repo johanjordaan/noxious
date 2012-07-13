@@ -35,12 +35,12 @@ construct_class = (default_name,template) =>
     @template_instance = template_instance
     construct_class_field(@,key,template_instance[key]) for key in Object.keys(template_instance)
     @save = (callback)=>
-      console.log @
+      # console.log @
       db_val = {} 
       db_val.type_ = @__name
       construct_db_field(db_val,key,template_instance[key],@) for key in Object.keys(template_instance)
       if @__id
-        console.log 'Merge',@__id
+        # console.log 'Merge',@__id
         db.merge @__id,db_val, (err,res)=>
           if err
             console.log '---',err,res
@@ -48,7 +48,7 @@ construct_class = (default_name,template) =>
             @__id = res.id
           callback()
       else
-        console.log 'Save'
+        # console.log 'Save'
         db.save db_val, (err,res)=>
           if err
             console.log '---',err,res
@@ -57,6 +57,9 @@ construct_class = (default_name,template) =>
           callback()
       undefined 
     undefined    
+  
+  module.exports[name].load = (id) =>
+    console.log 'Loading ...'
   
   # Create the load method in the module namespace for this class
   #

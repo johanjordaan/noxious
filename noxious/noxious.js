@@ -56,7 +56,6 @@
       }
       this.save = function(callback) {
         var db_val, _j, _len1, _ref3;
-        console.log(_this);
         db_val = {};
         db_val.type_ = _this.__name;
         _ref3 = Object.keys(template_instance);
@@ -65,7 +64,6 @@
           construct_db_field(db_val, key, template_instance[key], _this);
         }
         if (_this.__id) {
-          console.log('Merge', _this.__id);
           db.merge(_this.__id, db_val, function(err, res) {
             if (err) {
               console.log('---', err, res);
@@ -75,7 +73,6 @@
             return callback();
           });
         } else {
-          console.log('Save');
           db.save(db_val, function(err, res) {
             if (err) {
               console.log('---', err, res);
@@ -88,6 +85,9 @@
         return void 0;
       };
       return void 0;
+    };
+    module.exports[name].load = function(id) {
+      return console.log('Loading ...');
     };
     constructed_artifacts.push(plural);
     return module.exports[plural] = {

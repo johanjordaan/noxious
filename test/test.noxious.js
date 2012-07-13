@@ -130,11 +130,12 @@
           _this = this;
         u = new nox.User;
         u.name = 'Johan';
-        return u.save(function() {
+        u.save(function() {
           return u.save(function() {
             return done();
           });
         });
+        return nox.User.load();
       });
     });
   });

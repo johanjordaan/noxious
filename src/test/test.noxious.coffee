@@ -111,4 +111,5 @@ describe 'save',()=>
         u.save ()=>  
           u.save ()=>
             done()
+        nox.User.load()
     
