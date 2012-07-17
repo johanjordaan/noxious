@@ -25,8 +25,14 @@ npm install -d
     \routes
     \test
     
+    
+    
+    \src
+      \models     *.model.coffee
+      \test       test.*.coffee
+      \routes     *.coffee
+    
 ```
-
 
 4. Create create a new class template (src/templates/post.template.coffee)
 ```

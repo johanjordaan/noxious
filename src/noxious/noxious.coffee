@@ -2,6 +2,7 @@ fs = require 'fs'
 path =  require 'path'
 cradle = require 'cradle'
 async = require 'async'
+ejs = require 'ejs'
 
 constructed_artifacts = []
 
@@ -19,6 +20,34 @@ construct_class_field = (cls,key,field) =>
 construct_db_field = (dest,key,field,source) =>
   if field.type == 'text'
     dest[key] = source[key]
+
+construct_db_field_query = (dest,key,field,source) =>
+  if field.type == 'text'
+    dest[key] = (doc) ->
+      if doc.resource == field.name && doc[key] == source[key]
+        emit doc.id,doc
+
+        
+construct_class_file = (template_file_name,default_name,template) =>
+  t = """require '<%= template_file_name %>'
+  # hallo
+  class <%= name %>
+    constructor: ->  
+  
+  """ 
+  params = {}
+  
+  # Create an instance of the template sothat we can utilise its innards like __xxx
+  #
+  params.template_file_name = template_file_name
+  params.template_instance = new template
+  params.name = params.template_instance.__name ? default_name
+  params.plural = params.template_instance.__plural ? params.name+'s' 
+
+  # Open file
+  # Require template file
+  # Define class  
+  console.log ejs.render(t,params)      
     
 construct_class = (default_name,template) =>
   # Create an instance of the template sothat we can utilise its innards like __xxx
@@ -26,6 +55,11 @@ construct_class = (default_name,template) =>
   template_instance = new template
   name = template_instance.__name ? default_name
   plural = template_instance.__plural ? name+'s' 
+
+  # Create the class views in the db
+  #
+  db_view = {}
+  construct_db_field(db_view,key,template_instance[key],@) for key in Object.keys(template_instance)
   
   # Create the class in the module namespace
   #
@@ -37,7 +71,7 @@ construct_class = (default_name,template) =>
     @save = (callback)=>
       # console.log @
       db_val = {} 
-      db_val.type_ = @__name
+      db_val.resource = @__name
       construct_db_field(db_val,key,template_instance[key],@) for key in Object.keys(template_instance)
       if @__id
         # console.log 'Merge',@__id
@@ -59,19 +93,21 @@ construct_class = (default_name,template) =>
     undefined    
   
   module.exports[name].load = (id) =>
-    console.log 'Loading ...'
+    #console.log 'Loading ...',id
   
   # Create the load method in the module namespace for this class
   #
   constructed_artifacts.push(plural)
   module.exports[plural] = 
     load : () ->
-      console.log 'Loading ...'
+      #console.log 'Loading ...'
 
 construct_classes_from_file = (file) =>
   tmp = require file
   construct_class(key,tmp[key]) for key in Object.keys(tmp)
+  construct_class_file(file,key,tmp[key]) for key in Object.keys(tmp)
 
+  
 construct_classes_from_dir = (dir) =>
   construct_classes_from_file(path.join(dir,file)) for file in fs.readdirSync dir
 

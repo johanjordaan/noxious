@@ -16,7 +16,10 @@ class User
     @name = new types.TextField 10,'johan'
     @surname = new types.TextField 20
     @gender = new types.RefField 'Gender'
-
+  
+    
+    
+    
 class Gender
   constructor: ->
     @__name = 'Gender'

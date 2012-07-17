@@ -7,6 +7,8 @@
     , "ejs": ">= 0.0.1"
     , "chai": "*"
     , "cradle": "*"
-    , "async":"*"
+    , "async": "*"
+    , "commander": "*"
+    , "winston": "*"
   }
 }
