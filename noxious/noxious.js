@@ -57,8 +57,7 @@
     params.template_file_name = template_file_name;
     params.template_instance = new template;
     params.name = (_ref = params.template_instance.__name) != null ? _ref : default_name;
-    params.plural = (_ref1 = params.template_instance.__plural) != null ? _ref1 : params.name + 's';
-    return console.log(ejs.render(t, params));
+    return params.plural = (_ref1 = params.template_instance.__plural) != null ? _ref1 : params.name + 's';
   };
 
   construct_class = function(default_name, template) {

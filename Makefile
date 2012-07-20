@@ -6,8 +6,13 @@ all: run
 #	@uglifyjs easyajaxforms.js > easyajaxforms-min.js
 #	@cp easyajaxforms.js examples/public/javascripts/easyajaxforms.js
 
-build: 
+clean:
+	@rm -Rf bin
+
+build: clean
 	@coffee -c -o . src
+	@node bin/xcp.js src '*.ejs' .
+	@node bin/xcp.js src '*.js' .
 
 tests: build 
 	@mocha  

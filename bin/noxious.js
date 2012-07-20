@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require('./cmd.js');
+require('./_noxious.js')

@@ -47,7 +47,7 @@ construct_class_file = (template_file_name,default_name,template) =>
   # Open file
   # Require template file
   # Define class  
-  console.log ejs.render(t,params)      
+  #console.log ejs.render(t,params)      
     
 construct_class = (default_name,template) =>
   # Create an instance of the template sothat we can utilise its innards like __xxx
